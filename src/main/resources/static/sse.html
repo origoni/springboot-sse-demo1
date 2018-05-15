@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>SSE Test</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Server Sent Events Test Client</h1>
+    <hr>
+    <div id="log" class="shadow p-3 mb-4 mt-3 bg-light rounded"></div>
+</div>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/webjars/popper.js/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script>
+    if (!!window.EventSource) {
+        var eventSource = new EventSource("/sse");
+
+        eventSource.onmessage = function (e) {
+            var msg = JSON.parse(e.data);
+            message('success', new Date(msg.time) + "현재 접속자 " + msg.count + "명.");
+        };
+
+        eventSource.onopen = function (e) {
+            message('info', 'connection was opened');
+        };
+
+        eventSource.onerror = function (e) {
+            if (e.readyState == EventSource.CONNECTING) {
+                message('info', 'event: CONNECTING');
+            } else if (e.readyState == EventSource.OPEN) {
+                message('info', 'event: OPEN');
+            } else if (e.readyState == EventSource.CLOSING) {
+                message('warning', 'event: CLOSING');
+            } else if (e.readyState == EventSource.CLOSED) {
+                message('dark', 'event: CLOSED');
+            }
+        };
+    } else {
+        message('danger', 'The browser does not support Server-Sent Events');
+    }
+
+    function message(color, msg) {
+        $('#log').prepend(
+            '<p class="text-' + color + '">' + msg + '</p>');
+    }
+</script>
+
+</body>
+</html>
